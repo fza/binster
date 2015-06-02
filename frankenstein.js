@@ -32,6 +32,10 @@ function thrType() {
   thr.apply(null, [TypeError].concat([].slice.call(arguments)));
 }
 
+function thrInvalidByteLength() {
+  thrType('byteLength must be greater than or equal zero');
+}
+
 var LITTLE_ENDIAN_PLATFORM = (function () {
   var buf = new ArrayBuffer(2);
   new DataView(buf).setInt16(0, 256, true);
@@ -123,7 +127,7 @@ function Frankenstein(src, options) {
   } else if (src instanceof DataView) {
     arrayBuffer = src.buffer;
     srcIsDataView = true;
-  //} else if (Blob && src instanceof Blob) { // TODO Figure out how to do this synchronously
+    //} else if (Blob && src instanceof Blob) { // TODO Figure out how to do this synchronously
     //var fileReader = new FileReader();
     //fileReader.onload = function () {
     //  src = this.result;
@@ -688,7 +692,7 @@ Frankenstein.addDataType = function (name, def) {
     var argsLength = arguments.length;
     var args = argsLength > 2 ? slice.call(arguments) : null;
     var fn = write ? 'set' : 'get';
-    //console.log(this.constructor.name, write ? 'set' : 'get', name, offset);
+
     if (!def[fn]) {
       thr('Cannot %s %s: %s not defined', write ? 'write' : 'read', name, write ? 'setter' : 'getter');
     }
@@ -765,7 +769,7 @@ var baseTypes = {
     size: getByteLengthOfObject,
     get: function (stream, offset, byteLength) {
       if (byteLength < 0) {
-        thrType('byteLength must be greater than or equal zero');
+        thrInvalidByteLength();
       } else if (byteLength === 0) {
         return nullBuffer;
       } else if (offset === 0 && (!byteLength || byteLength === stream.byteLength)) {
@@ -783,7 +787,7 @@ var baseTypes = {
     size: getByteLengthOfObject,
     get: function (stream, offset, byteLength) {
       if (byteLength < 0) {
-        thrType('byteLength must be greater than or equal zero');
+        thrInvalidByteLength();
       } else if (byteLength === 0) {
         return nullByteArray;
       } else if (offset === 0 && (!byteLength || byteLength === stream.byteLength)) {
@@ -802,7 +806,7 @@ var baseTypes = {
     get: function (stream, offset, byteLength) {
       var arrayBuf;
       if (byteLength < 0) {
-        thrType('byteLength must be greater than or equal zero');
+        thrInvalidByteLength();
       } else if (byteLength === 0) {
         arrayBuf = nullBuffer;
       } else if (offset === 0 && (!byteLength || byteLength === stream.byteLength)) {
@@ -898,14 +902,14 @@ var baseTypes = {
     }
   },
 
-  // Plain 7-bit ASCII or 8-bit byte-to-charcode ("raw" mode)l
+  // Plain 7-bit ASCII or 8-bit byte-to-charcode ("raw" mode)
   string: {
     size: function (str, raw) {
       return str.length;
     },
     get: function (stream, offset, byteLength, raw) {
       if (byteLength < 0) {
-        thrType('byteLength must be greater than or equal zero');
+        thrInvalidByteLength();
       } else if (byteLength === 0) {
         return '';
       } else if (offset === 0 && (!byteLength || byteLength === stream.byteLength)) {
