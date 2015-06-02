@@ -127,12 +127,6 @@ function Frankenstein(src, options) {
   } else if (src instanceof DataView) {
     arrayBuffer = src.buffer;
     srcIsDataView = true;
-    //} else if (Blob && src instanceof Blob) { // TODO Figure out how to do this synchronously
-    //var fileReader = new FileReader();
-    //fileReader.onload = function () {
-    //  src = this.result;
-    //};
-    //fileReader.readAsArrayBuffer(src);
   } else {
     thrType(
       'src must be an integer or an instance of ArrayBuffer, DataView, Frankenstein,' +
@@ -258,6 +252,22 @@ defineProps(Frankenstein, {
     value: {}
   }
 });
+
+Frankenstein.fromBlob = function (blob, cb) {
+  if (typeof cb !== 'function') {
+    return;
+  }
+
+  if (Blob && blob instanceof Blob) {
+    var fileReader = new FileReader();
+    fileReader.onload = function () {
+      cb(new Frankenstein(fileReader.result));
+    };
+    fileReader.readAsArrayBuffer(blob);
+  } else {
+    cb(new Frankenstein(blob));
+  }
+};
 
 var FrankensteinProto = Frankenstein.prototype;
 
