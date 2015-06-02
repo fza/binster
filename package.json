@@ -1,0 +1,28 @@
+{
+  "name": "frankenstein",
+  "version": "0.1.0",
+  "description": "Fluent binary parser for node.js and the browser",
+  "homepage": "https://git.fapprik.com/frankenstein/frankenstein",
+  "author": {
+    "name": "Felix Zandanel",
+    "email": "felix@zandanel.me",
+    "url": "http://felix.zandanel.me"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@git.fapprik.com:frankenstein/frankenstein.git"
+  },
+  "bugs": {
+    "url": "https://git.fapprik.com/frankenstein/frankenstein/issues"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">= 0.10.0"
+  },
+  "main": "frankenstein.js",
+  "keywords": [
+    "fluent",
+    "binary",
+    "parser"
+  ]
+}
