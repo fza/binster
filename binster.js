@@ -80,14 +80,14 @@ function validateExponentialGrowthFactor(factor) {
   }
 }
 
-var FrankensteinsMonsterPeek;
+var BinsterPeek;
 
 /**
- * @param {number|ArrayBuffer|Uint8Array|Uint8ClampedArray|Int8Array|Uint16Array|Int16Array|Uint32Array|Int32Array|Float32Array|Float64Array|DataView|FrankensteinsMonster} src
+ * @param {number|ArrayBuffer|Uint8Array|Uint8ClampedArray|Int8Array|Uint16Array|Int16Array|Uint32Array|Int32Array|Float32Array|Float64Array|DataView|Binster} src
  * @param {object} [options] Options
  * @constructor
  */
-function FrankensteinsMonster(src, options) {
+function Binster(src, options) {
   options = options || {};
 
   var overAllocateFactor = options.overAllocateFactor || DEFAULT_OVERALLOCATE_FACTOR;
@@ -99,8 +99,7 @@ function FrankensteinsMonster(src, options) {
 
   var srcIsNumber = typeof src === 'number';
   if (!srcIsNumber && options.copySource) {
-    src = (src instanceof
-    FrankensteinsMonster ? src : new FrankensteinsMonster(src)).toByteArray(true, true);
+    src = (src instanceof Binster ? src : new Binster(src)).toByteArray(true, true);
   }
 
   var arrayBuffer;
@@ -108,7 +107,7 @@ function FrankensteinsMonster(src, options) {
 
   if (srcIsNumber) {
     if (src <= 0) {
-      thrType('Cannot create a FrankensteinsMonster with a new buffer whose length is less than 1 byte');
+      thrType('Cannot create a Binster with a new buffer whose length is less than 1 byte');
     } else if (src === 0) {
       arrayBuffer = nullBuffer;
     } else {
@@ -117,7 +116,7 @@ function FrankensteinsMonster(src, options) {
     isNew = true;
   } else if (src instanceof ArrayBuffer) {
     arrayBuffer = src;
-  } else if (src instanceof FrankensteinsMonster || src instanceof FrankensteinsMonsterPeek) {
+  } else if (src instanceof Binster || src instanceof BinsterPeek) {
     arrayBuffer = src.arrayBuffer;
   } else if (isTypedArray(src)) {
     arrayBuffer = src.buffer;
@@ -130,13 +129,13 @@ function FrankensteinsMonster(src, options) {
     srcIsDataView = true;
   } else {
     thrType(
-      'src must be an integer or an instance of ArrayBuffer, DataView, FrankensteinsMonster,' +
+      'src must be an integer or an instance of ArrayBuffer, DataView, Binster,' +
       'or any TypedArray constructor'
     );
   }
 
   defineProps.call(null, this, {
-    monster: {
+    stream: {
       value: this
     },
 
@@ -171,7 +170,7 @@ function FrankensteinsMonster(src, options) {
     },
 
     littleEndian: {
-      value: !!options.littleEndian // FrankensteinsMonster defaults to big endian mode
+      value: !!options.littleEndian // Binster defaults to big endian mode
     },
 
     _buffer: {
@@ -220,7 +219,7 @@ function FrankensteinsMonster(src, options) {
   });
 }
 
-defineProps(FrankensteinsMonster, {
+defineProps(Binster, {
   DEFAULT_OVERALLOCATE_FACTOR: {
     enumerable: true,
     get: function () {
@@ -254,7 +253,7 @@ defineProps(FrankensteinsMonster, {
   }
 });
 
-FrankensteinsMonster.fromBlob = function (blob, cb) {
+Binster.fromBlob = function (blob, cb) {
   if (typeof cb !== 'function') {
     return;
   }
@@ -262,21 +261,21 @@ FrankensteinsMonster.fromBlob = function (blob, cb) {
   if (Blob && blob instanceof Blob) {
     var fileReader = new FileReader();
     fileReader.onload = function () {
-      cb(new FrankensteinsMonster(fileReader.result));
+      cb(new Binster(fileReader.result));
     };
     fileReader.readAsArrayBuffer(blob);
   } else {
-    cb(new FrankensteinsMonster(blob));
+    cb(new Binster(blob));
   }
 };
 
-var FrankensteinsMonsterProto = FrankensteinsMonster.prototype;
+var BinsterProto = Binster.prototype;
 
-FrankensteinsMonsterProto.grow = function (minAllocateBytes) {
+BinsterProto.grow = function (minAllocateBytes) {
   if (!this.extensible) {
-    thr('Cannot grow a non-extensible FrankensteinsMonster buffer');
+    thr('Cannot grow a non-extensible data stream');
   } else if (this._frozen) {
-    thr('Cannot grow a frozen FrankensteinsMonster buffer');
+    thr('Cannot grow a frozen data stream');
   }
 
   minAllocateBytes = +minAllocateBytes || 0;
@@ -297,18 +296,18 @@ FrankensteinsMonsterProto.grow = function (minAllocateBytes) {
   this._view = new DataView(newArrayBuffer);
 };
 
-FrankensteinsMonsterProto.freeze = function () {
+BinsterProto.freeze = function () {
   this._frozen = true;
   this._writing = false;
   return this;
 };
 
-FrankensteinsMonsterProto.unfreeze = function () {
+BinsterProto.unfreeze = function () {
   this._frozen = false;
   return this;
 };
 
-FrankensteinsMonsterProto.toArrayBuffer = function (copy, dataLengthOnly) {
+BinsterProto.toArrayBuffer = function (copy, dataLengthOnly) {
   dataLengthOnly = dataLengthOnly !== false;
 
   if (copy) {
@@ -319,7 +318,7 @@ FrankensteinsMonsterProto.toArrayBuffer = function (copy, dataLengthOnly) {
   return this.buffer.slice(0, !dataLengthOnly ? this.byteLength : this._dataLength);
 };
 
-FrankensteinsMonsterProto.toByteArray = function (copy, dataLengthOnly) {
+BinsterProto.toByteArray = function (copy, dataLengthOnly) {
   dataLengthOnly = dataLengthOnly !== false;
 
   if (copy) {
@@ -336,53 +335,50 @@ FrankensteinsMonsterProto.toByteArray = function (copy, dataLengthOnly) {
   return new Uint8Array(this.toArrayBuffer(false, dataLengthOnly));
 };
 
-FrankensteinsMonsterProto.clone = function () {
+BinsterProto.clone = function () {
   var wasFrozen = this.frozen;
-  var clonedFrankensteinsMonster = new FrankensteinsMonster(this.toByteArray(true, false));
+  var clonedBinster = new Binster(this.toByteArray(true, false));
 
   if (!wasFrozen) {
     this.unfreeze();
   }
 
-  return clonedFrankensteinsMonster;
+  return clonedBinster;
 };
 
-FrankensteinsMonsterProto.toString = function () {
-  return '[object FrankensteinsMonster ' +
-    'byteLength=' + this.byteLength + ' ' +
-    'offset=' + this._offset +
-    ']';
+BinsterProto.toString = function () {
+  return '[object Binster byteLength=' + this.byteLength + ' offset=' + this._offset + ']';
 };
 
 /**
- * @param {FrankensteinsMonster} monster FrankensteinsMonster, whose buffer to peek at
- * @param {number} [offset] Absolute byte offset, defaults to the monster's current offset
- * @param {?boolean} [writingMode] Explicit mode of the FrankensteinsMonsterPeek, defaults to the
- *   mode of the wrapped FrankensteinsMonster instance
+ * @param {Binster} stream Binster, whose buffer to peek at
+ * @param {number} [streamOffset] Absolute byte offset, defaults to Binster's current offset
+ * @param {?boolean} [writingMode] Explicit mode of the BinsterPeek, defaults to the mode of
+ *   the wrapped Binster instance
  * @constructor
  */
-FrankensteinsMonsterPeek = function FrankensteinsMonsterPeek(monster, offset, writingMode) {
-  if (!(monster instanceof FrankensteinsMonster)) {
-    thrType('monster must be a FrankensteinsMonster');
+BinsterPeek = function BinsterPeek(stream, streamOffset, writingMode) {
+  if (!(stream instanceof Binster)) {
+    thrType('stream must be a Binster');
   }
 
-  offset = typeof offset === 'number' ? offset : monster._offset;
+  streamOffset = typeof streamOffset === 'number' ? streamOffset : stream._offset;
 
-  if (offset < 0) {
-    thrType('offset must be greater than or equal zero');
-  } else if (offset > monster.byteLength) {
+  if (streamOffset < 0) {
+    thrType('streamOffset must be greater than or equal zero');
+  } else if (streamOffset > stream.byteLength) {
     thrType('Cannot peek beyond buffer size');
   }
 
   defineProps.call(null, this, {
-    monster: {
+    stream: {
       enumerable: true,
-      value: monster
+      value: stream
     },
 
     _offset: {
       writable: true,
-      value: offset
+      value: streamOffset
     },
 
     _lastSkippedBytes: {
@@ -392,76 +388,75 @@ FrankensteinsMonsterPeek = function FrankensteinsMonsterPeek(monster, offset, wr
 
     _writing: {
       writable: true,
-      value: typeof writingMode === 'boolean' ? writingMode : monster.writing
+      value: typeof writingMode === 'boolean' ? writingMode : stream.writing
     }
   });
 };
 
-FrankensteinsMonster.FrankensteinsMonsterPeek = FrankensteinsMonsterPeek;
-var FrankensteinsMonsterPeekProto = FrankensteinsMonsterPeek.prototype;
+Binster.BinsterPeek = BinsterPeek;
+var BinsterPeekProto = BinsterPeek.prototype;
 
-defineProps.call(null, FrankensteinsMonsterPeekProto, {
+defineProps.call(null, BinsterPeekProto, {
   extensible: {
     enumerable: true,
     get: function () {
-      return this.monster.extensible;
+      return this.stream.extensible;
     }
   },
 
   exponentialGrowth: {
     enumerable: true,
     get: function () {
-      return this.monster.exponentialGrowth;
+      return this.stream.exponentialGrowth;
     }
   },
 
   exponentialGrowthFactor: {
     enumerable: true,
     get: function () {
-      return this.monster.exponentialGrowthFactor;
+      return this.stream.exponentialGrowthFactor;
     }
   },
 
   overAllocateFactor: {
     enumerable: true,
     get: function () {
-      return this.monster.overAllocateFactor;
+      return this.stream.overAllocateFactor;
     }
   },
 
   littleEndian: {
     enumerable: true,
     get: function () {
-      return this.monster.littleEndian;
+      return this.stream.littleEndian;
     }
   }
 });
 
-FrankensteinsMonsterPeekProto.toString = function () {
-  return '[object FrankensteinsMonsterPeek byteLength=' + this.byteLength + ' offset=' +
-    this._offset + ']';
+BinsterPeekProto.toString = function () {
+  return '[object BinsterPeek byteLength=' + this.byteLength + ' offset=' + this._offset + ']';
 };
 
-[FrankensteinsMonsterPeekProto, FrankensteinsMonsterProto].forEach(function (proto) {
+[BinsterPeekProto, BinsterProto].forEach(function (proto) {
   defineProps.call(null, proto, {
     arrayBuffer: {
       enumerable: true,
       get: function () {
-        return this.monster._buffer;
+        return this.stream._buffer;
       }
     },
 
     bytes: {
       enumerable: true,
       get: function () {
-        return this.monster._bytes;
+        return this.stream._bytes;
       }
     },
 
     view: {
       enumerable: true,
       get: function () {
-        return this.monster._view;
+        return this.stream._view;
       }
     },
 
@@ -482,7 +477,7 @@ FrankensteinsMonsterPeekProto.toString = function () {
     dataLength: {
       enumerable: true,
       get: function () {
-        return this.monster._dataLength;
+        return this.stream._dataLength;
       }
     },
 
@@ -503,14 +498,14 @@ FrankensteinsMonsterPeekProto.toString = function () {
     frozen: {
       enumerable: true,
       get: function () {
-        return this.monster._frozen;
+        return this.stream._frozen;
       }
     },
 
     finished: {
       enumerable: true,
       get: function () {
-        return this._offset === this.monster.byteLength;
+        return this._offset === this.stream.byteLength;
       }
     },
 
@@ -540,7 +535,7 @@ FrankensteinsMonsterPeekProto.toString = function () {
       enumerable: true,
       get: function () {
         if (this._frozen) {
-          thr('Cannot write to a frozen FrankensteinsMonster buffer');
+          thr('Cannot write to a frozen data stream');
         }
 
         this._writing = true;
@@ -551,7 +546,7 @@ FrankensteinsMonsterPeekProto.toString = function () {
     peek: {
       enumerable: true,
       get: function () {
-        return new FrankensteinsMonsterPeek(this.monster, this._offset, this._writing);
+        return new BinsterPeek(this.stream, this._offset, this._writing);
       }
     }
   });
@@ -586,7 +581,7 @@ var commonMethods = {
     var overflow = (this._offset + byteLength) - this.byteLength;
     if (overflow > 0) {
       if (this._writing) {
-        this.monster.grow(overflow);
+        this.stream.grow(overflow);
       } else {
         thr('Cannot skip to an offset beyond buffer length');
       }
@@ -611,37 +606,37 @@ commonMethods.from = commonMethods.seek;
 commonMethods.pad = commonMethods.skipMod;
 
 Object.keys(commonMethods).forEach(function (key) {
-  FrankensteinsMonsterProto[key] = FrankensteinsMonsterPeekProto[key] = commonMethods[key];
+  BinsterProto[key] = BinsterPeekProto[key] = commonMethods[key];
 });
 
 function createExtendingGetter(derivedTypeDef, baseGetter) {
   derivedTypeDef._ownGet = derivedTypeDef.get;
 
-  return function (monster, offset, arg1, arg2) {
+  return function (stream, offset, arg1, arg2) {
     var val, args;
 
     if (arguments.length < 5) {
-      val = baseGetter(monster, offset, arg1, arg2);
-      return derivedTypeDef._ownGet(monster, offset, val, arg1, arg2);
+      val = baseGetter(stream, offset, arg1, arg2);
+      return derivedTypeDef._ownGet(stream, offset, val, arg1, arg2);
     }
 
     args = slice.call(arguments, 2);
-    val = baseGetter.apply(null, [monster, offset].concat(args));
-    return derivedTypeDef._ownGet.apply(derivedTypeDef, [monster, offset, val].concat(args));
+    val = baseGetter.apply(null, [stream, offset].concat(args));
+    return derivedTypeDef._ownGet.apply(derivedTypeDef, [stream, offset, val].concat(args));
   };
 }
 
 function createExtendingSetter(derivedTypeDef, baseSetter) {
   derivedTypeDef._ownSet = derivedTypeDef.set;
 
-  return function (monster, offset, val, arg1, arg2) {
+  return function (stream, offset, val, arg1, arg2) {
     if (arguments.length < 6) {
-      val = derivedTypeDef._ownSet(monster, offset, val, arg1, arg2);
-      baseSetter(monster, offset, val, arg1, arg2);
+      val = derivedTypeDef._ownSet(stream, offset, val, arg1, arg2);
+      baseSetter(stream, offset, val, arg1, arg2);
     } else {
       var args = slice.call(arguments, 3);
-      val = derivedTypeDef._ownSet.apply(derivedTypeDef, [monster, offset, val].concat(args));
-      baseSetter.apply(null, [monster, offset, val].concat(args));
+      val = derivedTypeDef._ownSet.apply(derivedTypeDef, [stream, offset, val].concat(args));
+      baseSetter.apply(null, [stream, offset, val].concat(args));
     }
   };
 }
@@ -677,13 +672,13 @@ function extendDataType(derivedTypeDef, baseTypeDef) {
   return derivedTypeDef;
 }
 
-FrankensteinsMonster.addDataType = function (name, def) {
-  if (FrankensteinsMonsterProto[name]) {
+Binster.addDataType = function (name, def) {
+  if (BinsterProto[name]) {
     thr('Disallowing redefininition of data type %s', name);
   }
 
   if (def.extend) {
-    var baseFn = FrankensteinsMonsterProto[def.extend];
+    var baseFn = BinsterProto[def.extend];
     if (!baseFn || !baseFn.typeDef) {
       thr('Cannot use unknown data type %s as base for data type %s', def.extend, name);
     }
@@ -699,8 +694,8 @@ FrankensteinsMonster.addDataType = function (name, def) {
     thr('Simple data types need an explicit size definition greater than or equal zero: %s', name);
   }
 
-  var handler = FrankensteinsMonsterProto[name] = FrankensteinsMonsterPeekProto[name] = function (arg1, arg2) {
-    var monster = this.monster;
+  var handler = BinsterProto[name] = BinsterPeekProto[name] = function (arg1, arg2) {
+    var stream = this.stream;
     var offset = this._offset;
     var write = this._writing;
     var val, byteLength, overflow;
@@ -714,16 +709,16 @@ FrankensteinsMonster.addDataType = function (name, def) {
 
     if (write && !complexType) {
       byteLength = !sizeIsCb ? size : def.size(arg1, arg2);
-      if (monster.frozen) {
+      if (stream.frozen) {
         thr('Attempt to write %d bytes to a frozen buffer', byteLength);
       }
 
-      overflow = (offset + byteLength) - monster.byteLength;
+      overflow = (offset + byteLength) - stream.byteLength;
       if (overflow > 0) {
-        if (!monster.extensible) {
+        if (!stream.extensible) {
           thr('Attempt to write %d more bytes to a non-extensible buffer', overflow);
         }
-        monster.grow(overflow);
+        stream.grow(overflow);
       }
     }
 
@@ -745,7 +740,7 @@ FrankensteinsMonster.addDataType = function (name, def) {
       offset = (this._offset += byteLength);
 
       if (write) {
-        monster._dataLength = Math.max(offset, monster._dataLength);
+        stream._dataLength = Math.max(offset, stream._dataLength);
       }
     }
 
@@ -754,7 +749,7 @@ FrankensteinsMonster.addDataType = function (name, def) {
 
   handler.typeName = def.typeName = name;
 
-  defineProp.call(null, FrankensteinsMonster.types, name, {
+  defineProp.call(null, Binster.types, name, {
     enumerable: true,
     value: def
   });
@@ -767,12 +762,12 @@ FrankensteinsMonster.addDataType = function (name, def) {
   return def;
 };
 
-var addAlias = FrankensteinsMonster.addAlias = function (alias, dataType) {
-  if (FrankensteinsMonsterProto[alias]) {
+var addAlias = Binster.addAlias = function (alias, dataType) {
+  if (BinsterProto[alias]) {
     thr('Cannot add alias %s: A data type or alias of the same name already exists', alias);
   }
 
-  FrankensteinsMonsterProto[alias] = FrankensteinsMonsterPeekProto[alias] = FrankensteinsMonsterProto[dataType];
+  BinsterProto[alias] = BinsterPeekProto[alias] = BinsterProto[dataType];
 };
 
 function getByteLengthOfObject(obj) {
@@ -782,138 +777,138 @@ function getByteLengthOfObject(obj) {
 var baseTypes = {
   buffer: {
     size: getByteLengthOfObject,
-    get: function (monster, offset, byteLength) {
+    get: function (stream, offset, byteLength) {
       if (byteLength < 0) {
         thrInvalidByteLength();
       } else if (byteLength === 0) {
         return nullBuffer;
-      } else if (offset === 0 && (!byteLength || byteLength === monster.byteLength)) {
-        return monster.arrayBuffer;
+      } else if (offset === 0 && (!byteLength || byteLength === stream.byteLength)) {
+        return stream.arrayBuffer;
       }
 
-      return monster.arrayBuffer.slice(offset, byteLength ? offset + byteLength : null);
+      return stream.arrayBuffer.slice(offset, byteLength ? offset + byteLength : null);
     },
-    set: function (monster, offset, buf) {
-      monster.bytes.set(new Uint8Array(buf), offset);
+    set: function (stream, offset, buf) {
+      stream.bytes.set(new Uint8Array(buf), offset);
     }
   },
 
   byteArray: {
     size: getByteLengthOfObject,
-    get: function (monster, offset, byteLength) {
+    get: function (stream, offset, byteLength) {
       if (byteLength < 0) {
         thrInvalidByteLength();
       } else if (byteLength === 0) {
         return nullByteArray;
-      } else if (offset === 0 && (!byteLength || byteLength === monster.byteLength)) {
-        return monster.bytes;
+      } else if (offset === 0 && (!byteLength || byteLength === stream.byteLength)) {
+        return stream.bytes;
       }
 
-      return new Uint8Array(baseTypes.buffer.get(monster, offset, byteLength));
+      return new Uint8Array(baseTypes.buffer.get(stream, offset, byteLength));
     },
-    set: function (monster, offset, byteArray) {
-      monster.bytes.set(byteArray, offset);
+    set: function (stream, offset, byteArray) {
+      stream.bytes.set(byteArray, offset);
     }
   },
 
-  monster: {
+  stream: {
     size: getByteLengthOfObject,
-    get: function (monster, offset, byteLength) {
+    get: function (stream, offset, byteLength) {
       var arrayBuf;
       if (byteLength < 0) {
         thrInvalidByteLength();
       } else if (byteLength === 0) {
         arrayBuf = nullBuffer;
-      } else if (offset === 0 && (!byteLength || byteLength === monster.byteLength)) {
-        arrayBuf = monster.arrayBuffer;
+      } else if (offset === 0 && (!byteLength || byteLength === stream.byteLength)) {
+        arrayBuf = stream.arrayBuffer;
       } else {
-        arrayBuf = baseTypes.buffer.get(monster, offset, byteLength);
+        arrayBuf = baseTypes.buffer.get(stream, offset, byteLength);
       }
 
-      return new FrankensteinsMonster(arrayBuf);
+      return new Binster(arrayBuf);
     },
-    set: function (monster, offset, srcmonster) {
-      monster.bytes.set(srcmonster.toByteArray(), offset);
+    set: function (stream, offset, srcStream) {
+      stream.bytes.set(srcStream.toByteArray(), offset);
     }
   },
 
   uint8: {
     size: 1,
-    get: function (monster, offset) {
-      return monster.view.getUint8(offset);
+    get: function (stream, offset) {
+      return stream.view.getUint8(offset);
     },
-    set: function (monster, offset, val) {
-      monster.view.setUint8(offset, val);
+    set: function (stream, offset, val) {
+      stream.view.setUint8(offset, val);
     }
   },
 
   int8: {
     size: 1,
-    get: function (monster, offset) {
-      return monster.view.getInt8(offset);
+    get: function (stream, offset) {
+      return stream.view.getInt8(offset);
     },
-    set: function (monster, offset, val) {
-      monster.view.setInt8(offset, val);
+    set: function (stream, offset, val) {
+      stream.view.setInt8(offset, val);
     }
   },
 
   uint16: {
     size: 2,
-    get: function (monster, offset) {
-      return monster.view.getUint16(offset, monster.littleEndian);
+    get: function (stream, offset) {
+      return stream.view.getUint16(offset, stream.littleEndian);
     },
-    set: function (monster, offset, val) {
-      monster.view.setUint16(offset, val, monster.littleEndian);
+    set: function (stream, offset, val) {
+      stream.view.setUint16(offset, val, stream.littleEndian);
     }
   },
 
   int16: {
     size: 2,
-    get: function (monster, offset) {
-      return monster.view.getInt16(offset, monster.littleEndian);
+    get: function (stream, offset) {
+      return stream.view.getInt16(offset, stream.littleEndian);
     },
-    set: function (monster, offset, val) {
-      monster.view.setInt16(offset, val, monster.littleEndian);
+    set: function (stream, offset, val) {
+      stream.view.setInt16(offset, val, stream.littleEndian);
     }
   },
 
   uint32: {
     size: 4,
-    get: function (monster, offset) {
-      return monster.view.getUint32(offset, monster.littleEndian);
+    get: function (stream, offset) {
+      return stream.view.getUint32(offset, stream.littleEndian);
     },
-    set: function (monster, offset, val) {
-      monster.view.setUint32(offset, val, monster.littleEndian);
+    set: function (stream, offset, val) {
+      stream.view.setUint32(offset, val, stream.littleEndian);
     }
   },
 
   int32: {
     size: 4,
-    get: function (monster, offset) {
-      return monster.view.getInt32(offset, monster.littleEndian);
+    get: function (stream, offset) {
+      return stream.view.getInt32(offset, stream.littleEndian);
     },
-    set: function (monster, offset, val) {
-      monster.view.setInt32(offset, val, monster.littleEndian);
+    set: function (stream, offset, val) {
+      stream.view.setInt32(offset, val, stream.littleEndian);
     }
   },
 
   float32: {
     size: 4,
-    get: function (monster, offset) {
-      return monster.view.getFloat32(offset, monster.littleEndian);
+    get: function (stream, offset) {
+      return stream.view.getFloat32(offset, stream.littleEndian);
     },
-    set: function (monster, offset, val) {
-      monster.view.setFloat32(offset, val, monster.littleEndian);
+    set: function (stream, offset, val) {
+      stream.view.setFloat32(offset, val, stream.littleEndian);
     }
   },
 
   float64: {
     size: 8,
-    get: function (monster, offset) {
-      return monster.view.getFloat64(offset, monster.littleEndian);
+    get: function (stream, offset) {
+      return stream.view.getFloat64(offset, stream.littleEndian);
     },
-    set: function (monster, offset, val) {
-      monster.view.setFloat64(offset, val, monster.littleEndian);
+    set: function (stream, offset, val) {
+      stream.view.setFloat64(offset, val, stream.littleEndian);
     }
   },
 
@@ -922,27 +917,27 @@ var baseTypes = {
     size: function (str, raw) {
       return str.length;
     },
-    get: function (monster, offset, byteLength, raw) {
+    get: function (stream, offset, byteLength, raw) {
       if (byteLength < 0) {
         thrInvalidByteLength();
       } else if (byteLength === 0) {
         return '';
-      } else if (offset === 0 && (!byteLength || byteLength === monster.byteLength)) {
-        byteLength = monster.byteLength;
+      } else if (offset === 0 && (!byteLength || byteLength === stream.byteLength)) {
+        byteLength = stream.byteLength;
       }
 
       var str = '';
       for (var i = 0, byteVal; i < byteLength; ++i) {
-        byteVal = monster.view.getUint8(offset++);
+        byteVal = stream.view.getUint8(offset++);
         str += String.fromCharCode(raw ? byteVal : byteVal & 0x7f);
       }
       return str;
     },
-    set: function (monster, offset, str, raw) {
+    set: function (stream, offset, str, raw) {
       var byteLength = str.length;
       for (var i = 0, charCode; i < byteLength; ++i) {
         charCode = str.charCodeAt(i);
-        monster.view.setUint8(offset++, raw ? charCode : charCode & 0x7f);
+        stream.view.setUint8(offset++, raw ? charCode : charCode & 0x7f);
       }
     }
   },
@@ -958,21 +953,21 @@ var baseTypes = {
       uint32: Uint32Array,
       int32: Int32Array
     },
-    get: function (monster, offset, length, type, arg1, arg2) {
-      if (!type || !monster[type]) {
+    get: function (stream, offset, length, type, arg1, arg2) {
+      if (!type || !stream[type]) {
         thrType('type must be a valid data type');
       }
 
       var ByteArrayType = this.typedArrayMap[type];
       if (ByteArrayType) {
-        return new ByteArrayType(monster.buffer(
+        return new ByteArrayType(stream.buffer(
           length * ByteArrayType.BYTES_PER_ELEMENT
         ));
       }
 
       ByteArrayType = this.platformDependentTypedArrayMap[type];
-      if (ByteArrayType && monster.littleEndian === FrankensteinsMonster.LITTLE_ENDIAN_PLATFORM) {
-        return new ByteArrayType(monster.buffer(
+      if (ByteArrayType && stream.littleEndian === Binster.LITTLE_ENDIAN_PLATFORM) {
+        return new ByteArrayType(stream.buffer(
           length * ByteArrayType.BYTES_PER_ELEMENT
         ));
       }
@@ -982,52 +977,52 @@ var baseTypes = {
       var i = 0;
       if (argsLength === 0) {
         for (; i < length; ++i) {
-          arr[i] = monster[type]();
+          arr[i] = stream[type]();
         }
       } else if (argsLength === 1) {
         for (; i < length; ++i) {
-          arr[i] = monster[type](arg1);
+          arr[i] = stream[type](arg1);
         }
       } else if (argsLength === 2) {
         for (; i < length; ++i) {
-          arr[i] = monster[type](arg1, arg2);
+          arr[i] = stream[type](arg1, arg2);
         }
       } else {
         var args = slice.call(arguments, 4);
         for (; i < length; ++i) {
-          arr[i] = monster[type].apply(monster, args);
+          arr[i] = stream[type].apply(stream, args);
         }
       }
 
       return arr;
     },
-    set: function (monster, offset, arr, type, arg1, arg2) {
+    set: function (stream, offset, arr, type, arg1, arg2) {
       var length = arr.length;
       var argsLength = arguments.length - 4;
       var i = 0, args;
       if (argsLength === 0) {
         for (; i < length; ++i) {
-          monster[type](arr[i]);
+          stream[type](arr[i]);
         }
       } else if (argsLength === 1) {
         for (; i < length; ++i) {
-          monster[type](arr[i], arg1);
+          stream[type](arr[i], arg1);
         }
       } else if (argsLength === 2) {
         for (; i < length; ++i) {
-          monster[type](arr[i], arg1, arg2);
+          stream[type](arr[i], arg1, arg2);
         }
       } else {
         args = [null].concat(slice.call(arguments, 4));
         for (; i < length; ++i) {
-          monster[type].apply(monster, (args[0] = arr[i], args));
+          stream[type].apply(stream, (args[0] = arr[i], args));
         }
       }
     }
   },
 
   struct: {
-    get: function (monster, offset, struct) {
+    get: function (stream, offset, struct) {
       var obj = {};
       var structLength = struct.length;
       var itemDef, key, type, argsLength;
@@ -1036,26 +1031,26 @@ var baseTypes = {
         type = itemDef[1];
 
         if (type === 'skip' && itemDef[2] > 0) {
-          monster.skip(itemDef[2]);
+          stream.skip(itemDef[2]);
           continue;
         }
 
         key = itemDef[0];
         argsLength = itemDef.length - 2;
         if (argsLength === 0) {
-          obj[key] = monster[type]();
+          obj[key] = stream[type]();
         } else if (argsLength === 1) {
-          obj[key] = monster[type](itemDef[2]);
+          obj[key] = stream[type](itemDef[2]);
         } else if (argsLength === 2) {
-          obj[key] = monster[type](itemDef[2], itemDef[3]);
+          obj[key] = stream[type](itemDef[2], itemDef[3]);
         } else {
-          obj[key] = monster[type].apply(monster, itemDef.slice(2));
+          obj[key] = stream[type].apply(stream, itemDef.slice(2));
         }
       }
 
       return obj;
     },
-    set: function (monster, offset, obj, struct) {
+    set: function (stream, offset, obj, struct) {
       var structLength = struct.length;
       var itemDef, type, val;
       for (var i = 0; i < structLength; ++i) {
@@ -1065,7 +1060,7 @@ var baseTypes = {
         if (type === 'skip') {
           var skipByteVal = +itemDef[3] || 0;
           for (var j = 0; j < itemDef[2]; ++j) {
-            monster.uint8(skipByteVal);
+            stream.uint8(skipByteVal);
           }
           continue;
         }
@@ -1077,13 +1072,13 @@ var baseTypes = {
 
         var argsLength = itemDef - 2;
         if (argsLength === 0) {
-          monster[type](val);
+          stream[type](val);
         } else if (argsLength === 1) {
-          monster[type](val, itemDef[2]);
+          stream[type](val, itemDef[2]);
         } else if (itemDef.length < 5) {
-          monster[type](val, itemDef[2], itemDef[3]);
+          stream[type](val, itemDef[2], itemDef[3]);
         } else {
-          monster[type].apply(monster, [val].concat(itemDef.slice(2)));
+          stream[type].apply(stream, [val].concat(itemDef.slice(2)));
         }
       }
 
@@ -1103,11 +1098,11 @@ var baseTypes = {
       var self = this;
       var struct = derivedTypeDef.struct;
       return {
-        get: function (monster, offset) {
-          return self.get(monster, offset, struct);
+        get: function (stream, offset) {
+          return self.get(stream, offset, struct);
         },
-        set: function (monster, offset, obj) {
-          self.set(monster, offset, obj, struct);
+        set: function (stream, offset, obj) {
+          self.set(stream, offset, obj, struct);
         }
       };
     }
@@ -1115,12 +1110,12 @@ var baseTypes = {
 };
 
 Object.keys(baseTypes).forEach(function (name) {
-  FrankensteinsMonster.addDataType(name, baseTypes[name]);
+  Binster.addDataType(name, baseTypes[name]);
 });
 
-addAlias('stream', 'monster');
+addAlias('binster', 'stream');
 addAlias('float', 'float32');
 addAlias('double', 'float64');
 addAlias('object', 'struct');
 
-module.exports = FrankensteinsMonster;
+module.exports = Binster;
